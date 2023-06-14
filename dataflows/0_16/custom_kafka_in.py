@@ -7,7 +7,7 @@ from bytewax.run import cli_main
 from confluent_kafka import Consumer
 
 BROKER_ADDRESS = os.environ.get("BROKER_ADDRESS", "localhost:19092")
-CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", "input").split(", ")
+CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", "input-multiple").split(", ")
 PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC", "output")
 
 

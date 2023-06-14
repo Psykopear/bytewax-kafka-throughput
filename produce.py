@@ -33,5 +33,5 @@ while True:
     elif i >= limit:
         continue
     i += 1
-    producer.produce("input", row)
+    producer.produce("input-multiple", row)
     producer.flush()

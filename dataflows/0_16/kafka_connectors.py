@@ -5,24 +5,8 @@ from bytewax.connectors.kafka import KafkaOutput, KafkaInput
 from bytewax.run import cli_main
 
 BROKER_ADDRESS = os.environ.get("BROKER_ADDRESS", "localhost:19092")
-CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", "input").split(", ")
+CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", "input-multiple").split(", ")
 PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC", "output")
-
-
-i = 0
-
-
-class StopDataflow(Exception):
-    pass
-
-
-def stop(item):
-    global i
-    i += 1
-    if i > 10000:
-        print(i)
-        raise StopDataflow()
-    return item
 
 
 flow = Dataflow()
@@ -37,7 +21,6 @@ flow.input(
         },
     ),
 )
-# flow.map(stop)
 flow.output(
     "avg_device_output",
     KafkaOutput(
@@ -49,8 +32,4 @@ flow.output(
     ),
 )
 
-try:
-    cli_main(flow)
-except StopDataflow as e:
-    print(e)
-    pass
+cli_main(flow)
