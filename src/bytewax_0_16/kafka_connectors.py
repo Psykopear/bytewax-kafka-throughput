@@ -4,10 +4,10 @@ from bytewax.dataflow import Dataflow
 from bytewax.connectors.kafka import KafkaOutput, KafkaInput
 from bytewax.run import cli_main
 
-ID = "bw016-kafka-connectors"
-CONSUME_TOPIC = f"{ID}-in"
-PRODUCE_TOPIC = f"{ID}-out"
-BROKERS = os.environ.get("BROKERS", "localhost:19092,localhost:29092,localhost:39092")
+GROUP_ID = os.environ.get("GROUP_ID")
+CONSUME_TOPIC = os.environ.get("CONSUME_TOPIC")
+PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC")
+BROKERS = os.environ.get("BROKERS")
 
 
 if __name__ == "__main__":
@@ -19,7 +19,7 @@ if __name__ == "__main__":
             topics=[CONSUME_TOPIC],
             add_config={
                 "enable.auto.commit": True,
-                "group.id": ID,
+                "group.id": GROUP_ID,
             },
         ),
     )

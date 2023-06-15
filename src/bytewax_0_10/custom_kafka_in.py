@@ -5,16 +5,16 @@ from bytewax.inputs import ManualInputConfig, AdvanceTo, Emit
 from bytewax.execution import cluster_main
 from kafka import KafkaConsumer, KafkaProducer
 
-ID = "bw010-custom-kafka-in"
-CONSUME_TOPIC = f"{ID}-in"
-PRODUCE_TOPIC = f"{ID}-out"
-BROKERS = os.environ.get("BROKERS", "localhost:19092,localhost:29092,localhost:39092")
+GROUP_ID = os.environ.get("GROUP_ID")
+CONSUME_TOPIC = os.environ.get("CONSUME_TOPIC")
+PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC")
+BROKERS = os.environ.get("BROKERS")
 
 
 def input_builder(worker_index, worker_count, resume_epoch):
     consumer = KafkaConsumer(
         bootstrap_servers=BROKERS,
-        group_id=ID,
+        group_id=GROUP_ID,
         enable_auto_commit=True,
         auto_offset_reset="latest",
     )

@@ -6,10 +6,10 @@ from bytewax.connectors.kafka import KafkaOutput
 from bytewax.run import cli_main
 from confluent_kafka import Consumer
 
-ID = "bw016-custom-kafka-in"
-CONSUME_TOPIC = f"{ID}-in"
-PRODUCE_TOPIC = f"{ID}-out"
-BROKERS = os.environ.get("BROKERS", "localhost:19092,localhost:29092,localhost:39092")
+GROUP_ID = os.environ.get("GROUP_ID")
+CONSUME_TOPIC = os.environ.get("CONSUME_TOPIC")
+PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC")
+BROKERS = os.environ.get("BROKERS")
 
 
 class KafkaSource(StatelessSource):
@@ -50,7 +50,7 @@ class CustomKafkaInput(DynamicInput):
 
 if __name__ == "__main__":
     flow = Dataflow()
-    flow.input("sensor_input", CustomKafkaInput(BROKERS, [CONSUME_TOPIC], ID))
+    flow.input("sensor_input", CustomKafkaInput(BROKERS, [CONSUME_TOPIC], GROUP_ID))
     flow.output(
         "avg_device_output",
         KafkaOutput(

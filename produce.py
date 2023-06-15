@@ -15,6 +15,8 @@ if __name__ == "__main__":
     config = {"bootstrap.servers": BROKERS}
 
     producer = Producer(config)
+    # Repeatedly send the same message,
+    # we don't really care about the content
     content = {
         "dtm": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "device_id": "one",

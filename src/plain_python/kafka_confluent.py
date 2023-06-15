@@ -2,17 +2,17 @@ import os
 
 from confluent_kafka import Consumer, Producer
 
-ID = "plain-confluent-kafka"
-CONSUME_TOPIC = f"{ID}-in"
-PRODUCE_TOPIC = f"{ID}-out"
-BROKERS = os.environ.get("BROKERS", "localhost:19092,localhost:29092,localhost:39092")
+GROUP_ID = os.environ.get("GROUP_ID")
+CONSUME_TOPIC = os.environ.get("CONSUME_TOPIC")
+PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC")
+BROKERS = os.environ.get("BROKERS")
 
 
 if __name__ == "__main__":
     consumer = Consumer(
         {
             "bootstrap.servers": BROKERS,
-            "group.id": ID,
+            "group.id": GROUP_ID,
             "auto.offset.reset": "end",
             "enable.auto.commit": True,
         }

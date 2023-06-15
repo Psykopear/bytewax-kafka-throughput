@@ -1,0 +1,34 @@
+[[benches]]
+folder = "src/bytewax_0_10/"
+file = "custom_kafka_in.py"
+id = "bw010-custom-kafka-in"
+consume_topic = "input"
+produce_topic = "output"
+
+[[benches]]
+folder = "src/bytewax_0_16/"
+file = "custom_kafka_in.py"
+id = "bw016-custom-kafka-in"
+consume_topic = "input"
+produce_topic = "output"
+
+[[benches]]
+folder = "src/bytewax_0_16/"
+file = "kafka_connectors.py"
+id = "bw016-kafka-connectors"
+consume_topic = "input"
+produce_topic = "output"
+
+[[benches]]
+folder = "src/plain_python/"
+file = "kafka_confluent.py"
+id = "plain-kafka-confluent"
+consume_topic = "input"
+produce_topic = "output"
+
+[[benches]]
+folder = "src/plain_python/"
+file = "kafka_python.py"
+id = "plain-kafka-python"
+consume_topic = "input"
+produce_topic = "output"
