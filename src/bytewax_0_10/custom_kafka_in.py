@@ -5,8 +5,10 @@ from bytewax.inputs import ManualInputConfig, AdvanceTo, Emit
 from bytewax.execution import cluster_main
 from kafka import KafkaConsumer, KafkaProducer
 
+ID = "bw010-custom-kafka-in"
+
 BROKER_ADDRESS = os.environ.get("BROKER_ADDRESS")
-CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", "input-multiple").split(", ")
+CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", ID).split(", ")
 PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC")
 
 print("BROKER_ADDRESS: ", BROKER_ADDRESS)
@@ -18,7 +20,7 @@ producer = KafkaProducer(bootstrap_servers=BROKER_ADDRESS)
 def input_builder(worker_index, worker_count, resume_epoch):
     consumer = KafkaConsumer(
         bootstrap_servers=BROKER_ADDRESS,
-        group_id="dataflow-active-power-import-hourly-average",
+        group_id=ID,
         enable_auto_commit=True,
         auto_offset_reset="latest",
     )

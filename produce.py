@@ -8,6 +8,7 @@ from confluent_kafka.admin import AdminClient
 
 
 limit = 3000
+topic = "bw016-kafka-connectors"
 config = {"bootstrap.servers": "localhost:19092"}
 admin = AdminClient(config)
 producer = Producer(config)
@@ -33,5 +34,5 @@ while True:
     elif i >= limit:
         continue
     i += 1
-    producer.produce("input-multiple", row)
+    producer.produce(topic, row)
     producer.flush()

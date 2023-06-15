@@ -2,8 +2,9 @@ import os
 
 from confluent_kafka import Consumer, Producer
 
+ID = "plain-confluent-kafka"
 BROKER_ADDRESS = os.environ.get("BROKER_ADDRESS", "localhost:19092")
-CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", "input-multiple").split(", ")
+CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", ID).split(", ")
 PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC", "output")
 ERROR_VALUE = ("ERROR", None)
 
@@ -11,7 +12,7 @@ ERROR_VALUE = ("ERROR", None)
 consumer = Consumer(
     {
         "bootstrap.servers": BROKER_ADDRESS,
-        "group.id": "plain_confluent_kafka",
+        "group.id": ID,
         "auto.offset.reset": "end",
         "enable.auto.commit": True,
     }

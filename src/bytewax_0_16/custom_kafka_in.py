@@ -6,8 +6,9 @@ from bytewax.connectors.kafka import KafkaOutput
 from bytewax.run import cli_main
 from confluent_kafka import Consumer
 
+ID = "bw016-custom-kafka-in"
 BROKER_ADDRESS = os.environ.get("BROKER_ADDRESS", "localhost:19092")
-CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", "input-multiple").split(", ")
+CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", ID).split(", ")
 PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC", "output")
 
 
@@ -29,21 +30,26 @@ class KafkaSource(StatelessSource):
 
 
 class CustomKafkaInput(DynamicInput):
+    def __init__(self, broker, topics, group_id):
+        self.broker = broker
+        self.topics = topics
+        self.group_id = group_id
+
     def build(self, worker_index, worker_count):
         consumer = Consumer(
             {
-                "bootstrap.servers": BROKER_ADDRESS,
-                "group.id": "custom_kafka_in",
+                "bootstrap.servers": self.broker,
+                "group.id": self.group_id,
                 "auto.offset.reset": "end",
                 "enable.auto.commit": True,
             }
         )
-        consumer.subscribe(CONSUME_TOPICS)
-        return KafkaSource(consumer, CONSUME_TOPICS)
+        consumer.subscribe(self.topics)
+        return KafkaSource(consumer, self.topics)
 
 
 flow = Dataflow()
-flow.input("sensor_input", CustomKafkaInput())
+flow.input("sensor_input", CustomKafkaInput(BROKER_ADDRESS, CONSUME_TOPICS, ID))
 flow.output(
     "avg_device_output",
     KafkaOutput(
@@ -54,5 +60,6 @@ flow.output(
         },
     ),
 )
+
 
 cli_main(flow)
