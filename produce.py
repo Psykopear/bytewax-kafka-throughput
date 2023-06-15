@@ -10,7 +10,6 @@ from confluent_kafka import Producer
 BROKERS = os.environ.get("BROKERS", "localhost:19092,localhost:29092,localhost:39092")
 
 if __name__ == "__main__":
-    print(sys.argv)
     limit = int(sys.argv[1])
     topic = sys.argv[2]
     config = {"bootstrap.servers": BROKERS}

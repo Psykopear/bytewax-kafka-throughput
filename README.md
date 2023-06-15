@@ -1,4 +1,4 @@
-# Kafka-to-Kafka throughput benchmarks [WIP]
+# Kafka-to-Kafka throughput benchmarks
 
 Benchmarks for kafka to kafka throughput with various versions of bytewax, compared with a plain python script.
 In the benchmark we actually use `redpanda`, a kafka compatible streaming data platform, for ease of local deployment,
