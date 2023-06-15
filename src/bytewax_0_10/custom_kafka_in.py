@@ -2,13 +2,13 @@ import os
 
 from bytewax import Dataflow
 from bytewax.inputs import ManualInputConfig, AdvanceTo, Emit
-from bytewax.execution import cluster_main
+from bytewax.execution import run_main
 from kafka import KafkaConsumer, KafkaProducer
 
 GROUP_ID = os.environ.get("GROUP_ID")
 CONSUME_TOPIC = os.environ.get("CONSUME_TOPIC")
 PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC")
-BROKERS = os.environ.get("BROKERS")
+BROKERS = os.environ.get("BROKERS").split(",")
 
 
 def input_builder(worker_index, worker_count, resume_epoch):
@@ -44,4 +44,4 @@ def output_builder(worker_index, worker_count):
 if __name__ == "__main__":
     flow = Dataflow()
     flow.capture()
-    cluster_main(flow, ManualInputConfig(input_builder), output_builder)
+    run_main(flow, ManualInputConfig(input_builder), output_builder)

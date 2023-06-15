@@ -7,7 +7,7 @@ from bytewax.run import cli_main
 GROUP_ID = os.environ.get("GROUP_ID")
 CONSUME_TOPIC = os.environ.get("CONSUME_TOPIC")
 PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC")
-BROKERS = os.environ.get("BROKERS")
+BROKERS = os.environ.get("BROKERS").split(",")
 
 
 if __name__ == "__main__":

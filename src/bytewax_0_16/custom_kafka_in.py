@@ -9,7 +9,7 @@ from confluent_kafka import Consumer
 GROUP_ID = os.environ.get("GROUP_ID")
 CONSUME_TOPIC = os.environ.get("CONSUME_TOPIC")
 PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC")
-BROKERS = os.environ.get("BROKERS")
+BROKERS = os.environ.get("BROKERS").split(",")
 
 
 class KafkaSource(StatelessSource):
@@ -30,15 +30,15 @@ class KafkaSource(StatelessSource):
 
 
 class CustomKafkaInput(DynamicInput):
-    def __init__(self, broker, topics, group_id):
-        self.broker = broker
+    def __init__(self, brokers, topics, group_id):
+        self.brokers = brokers
         self.topics = topics
         self.group_id = group_id
 
     def build(self, worker_index, worker_count):
         consumer = Consumer(
             {
-                "bootstrap.servers": self.broker,
+                "bootstrap.servers": ",".join(self.brokers),
                 "group.id": self.group_id,
                 "auto.offset.reset": "end",
                 "enable.auto.commit": True,

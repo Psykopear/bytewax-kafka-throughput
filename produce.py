@@ -10,8 +10,9 @@ from confluent_kafka import Producer
 BROKERS = os.environ.get("BROKERS", "localhost:19092,localhost:29092,localhost:39092")
 
 if __name__ == "__main__":
-    limit = int(sys.argv[2])
-    topic = sys.argv[3]
+    print(sys.argv)
+    limit = int(sys.argv[1])
+    topic = sys.argv[2]
     config = {"bootstrap.servers": BROKERS}
 
     producer = Producer(config)
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     while True:
         elapsed = time() - start
         if elapsed > 1:
-            print(f"Produced {i} messages in {elapsed} seconds")
+            # print(f"Produced {i} messages in {elapsed} seconds")
             i = 0
             start = time()
         elif i >= limit:

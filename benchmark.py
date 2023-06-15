@@ -1,4 +1,5 @@
 import tomllib
+import traceback
 
 from csv import DictWriter
 from subprocess import Popen, check_output
@@ -31,21 +32,24 @@ def sample_group(id: str, topic: str):
 
 if __name__ == "__main__":
     # First of all, call the script to prepare the virtualenvironments
-    print(check_output(["./prepare_envs.sh"]))
+    # print(check_output(["./prepare_envs.sh"]))
 
     # Then load the configuration
     with open("config.toml", "rb") as f:
-        benches = tomllib.load(f)
-        # Just check we have everything
-        for bench in benches:
-            for key in ["folder", "file", "id", "consume_topic", "produce_topic"]:
-                assert key in bench, f"Missing {key} in bench config"
+        benches = tomllib.load(f)['benches']
+
+    # Just check we have everything
+    for bench in benches:
+        for key in ["folder", "file", "id", "consume_topic", "produce_topic"]:
+            assert key in bench, f"Missing {key} in bench config"
 
     for bench in benches:
+        producer_process = None
+        process = None
         try:
             log("Running producer")
             producer_process = Popen(
-                ["python", "produce.py", 3000, bench["consume_topic"]]
+                ["python", "produce.py", "3000", bench["consume_topic"]]
             )
             exe = f"{bench['folder']}/.venv/bin/python"
             file = f"{bench['folder']}/{bench['file']}"
@@ -60,8 +64,9 @@ if __name__ == "__main__":
             # Sample here
             log(f"Sampling lag for {bench['id']}")
             sample_group(bench["id"], bench["consume_topic"])
-        except Exception as e:
-            log(f"Error executing bench {bench['id']}: {e}")
+        except Exception:
+            log(f"Error executing bench {bench['id']}:")
+            print(traceback.format_exc())
             continue
         finally:
             if process is not None:
