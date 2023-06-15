@@ -1,2 +1,3 @@
 .venv
 .bytewax-*
+__pycache__

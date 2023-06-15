@@ -1,14 +1,18 @@
-pythons=""
-
 # Main python venv
 python -m venv .venv
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install confluent-kafka kafka-python bytewax
 
-# A python venv for each bytewax version/commit/ref
-for i do
-  python -m venv .bytewax-"$i"
-  .bytewax-"$i"/bin/pip install --upgrade pip
-  .bytewax-"$i"/bin/pip install confluent-kafka kafka-python
-  .bytewax-"$i"/bin/pip install git+https://github.com/bytewax/bytewax.git@"$i"
+for dir in src/*/
+do
+    # remove the trailing "/"
+    dir=${dir%*/}
+    # only take what's after the final "/"
+    dir=${dir##*/}
+    echo src/$dir
+    cd src/$dir
+    python -m venv .venv
+    .venv/bin/pip install --upgrade pip
+    .venv/bin/pip install -r requirements.txt
+    cd ../../
 done

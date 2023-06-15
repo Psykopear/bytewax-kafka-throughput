@@ -2,25 +2,24 @@ import os
 
 from kafka import KafkaConsumer, KafkaProducer
 
-
 ID = "plain-kafka-python"
-BROKER_ADDRESS = os.environ.get("BROKER_ADDRESS", "localhost:19092")
-CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", ID).split(", ")
-PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC", "output")
+CONSUME_TOPIC = f"{ID}-in"
+PRODUCE_TOPIC = f"{ID}-out"
+BROKERS = os.environ.get("BROKERS", "localhost:19092,localhost:29092,localhost:39092")
 
 
-consumer = KafkaConsumer(
-    bootstrap_servers=BROKER_ADDRESS,
-    group_id=ID,
-    enable_auto_commit=True,
-    auto_offset_reset="latest",
-)
-consumer.subscribe(topics=CONSUME_TOPICS)
-producer = KafkaProducer(bootstrap_servers=BROKER_ADDRESS)
+if __name__ == "__main__":
+    consumer = KafkaConsumer(
+        bootstrap_servers=BROKERS,
+        group_id=ID,
+        enable_auto_commit=True,
+        auto_offset_reset="latest",
+    )
+    consumer.subscribe(topics=[CONSUME_TOPIC])
+    producer = KafkaProducer(bootstrap_servers=BROKERS)
 
-while True:
-    results = []
-    result = consumer.poll(timeout_ms=250, max_records=500)
-    for records in result.values():
-        for record in records:
-            producer.send(PRODUCE_TOPIC, record.value)
+    while True:
+        result = consumer.poll(timeout_ms=250, max_records=500)
+        for records in result.values():
+            for record in records:
+                producer.send(PRODUCE_TOPIC, record.value)

@@ -1,0 +1,2 @@
+kafka-python==2.0.2
+bytewax @ git+https://github.com/bytewax/bytewax@v0.10.0

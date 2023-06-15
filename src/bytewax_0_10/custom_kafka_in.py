@@ -6,29 +6,19 @@ from bytewax.execution import cluster_main
 from kafka import KafkaConsumer, KafkaProducer
 
 ID = "bw010-custom-kafka-in"
-
-BROKER_ADDRESS = os.environ.get("BROKER_ADDRESS")
-CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", ID).split(", ")
-PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC")
-
-print("BROKER_ADDRESS: ", BROKER_ADDRESS)
-print("CONSUME_TOPICS: ", CONSUME_TOPICS)
-print("PRODUCE_TOPIC: ", PRODUCE_TOPIC)
-producer = KafkaProducer(bootstrap_servers=BROKER_ADDRESS)
+CONSUME_TOPIC = f"{ID}-in"
+PRODUCE_TOPIC = f"{ID}-out"
+BROKERS = os.environ.get("BROKERS", "localhost:19092,localhost:29092,localhost:39092")
 
 
 def input_builder(worker_index, worker_count, resume_epoch):
     consumer = KafkaConsumer(
-        bootstrap_servers=BROKER_ADDRESS,
+        bootstrap_servers=BROKERS,
         group_id=ID,
         enable_auto_commit=True,
         auto_offset_reset="latest",
     )
-    consumer.subscribe(topics=CONSUME_TOPICS)
-    print(
-        f"Consumer is configured to address {BROKER_ADDRESS} on topics {CONSUME_TOPICS}."
-    )
-
+    consumer.subscribe(topics=[CONSUME_TOPIC])
     yield AdvanceTo(resume_epoch)
     epoch = resume_epoch
     epoch = 0
@@ -43,6 +33,7 @@ def input_builder(worker_index, worker_count, resume_epoch):
 
 def output_builder(worker_index, worker_count):
     print("worker_index: ", worker_index, " worker_count: ", worker_count)
+    producer = KafkaProducer(bootstrap_servers=BROKERS)
 
     def send_to_kafka(item):
         producer.send(PRODUCE_TOPIC, item)
@@ -50,8 +41,7 @@ def output_builder(worker_index, worker_count):
     return send_to_kafka
 
 
-flow = Dataflow()
-flow.capture()
-
 if __name__ == "__main__":
+    flow = Dataflow()
+    flow.capture()
     cluster_main(flow, ManualInputConfig(input_builder), output_builder)

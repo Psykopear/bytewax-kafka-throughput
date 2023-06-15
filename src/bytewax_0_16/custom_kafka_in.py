@@ -7,9 +7,9 @@ from bytewax.run import cli_main
 from confluent_kafka import Consumer
 
 ID = "bw016-custom-kafka-in"
-BROKER_ADDRESS = os.environ.get("BROKER_ADDRESS", "localhost:19092")
-CONSUME_TOPICS = os.environ.get("CONSUME_TOPICS", ID).split(", ")
-PRODUCE_TOPIC = os.environ.get("PRODUCE_TOPIC", "output")
+CONSUME_TOPIC = f"{ID}-in"
+PRODUCE_TOPIC = f"{ID}-out"
+BROKERS = os.environ.get("BROKERS", "localhost:19092,localhost:29092,localhost:39092")
 
 
 class KafkaSource(StatelessSource):
@@ -48,18 +48,18 @@ class CustomKafkaInput(DynamicInput):
         return KafkaSource(consumer, self.topics)
 
 
-flow = Dataflow()
-flow.input("sensor_input", CustomKafkaInput(BROKER_ADDRESS, CONSUME_TOPICS, ID))
-flow.output(
-    "avg_device_output",
-    KafkaOutput(
-        brokers=[BROKER_ADDRESS],
-        topic=PRODUCE_TOPIC,
-        add_config={
-            "queue.buffering.max.kbytes": "512",
-        },
-    ),
-)
+if __name__ == "__main__":
+    flow = Dataflow()
+    flow.input("sensor_input", CustomKafkaInput(BROKERS, [CONSUME_TOPIC], ID))
+    flow.output(
+        "avg_device_output",
+        KafkaOutput(
+            brokers=BROKERS,
+            topic=PRODUCE_TOPIC,
+            add_config={
+                "queue.buffering.max.kbytes": "512",
+            },
+        ),
+    )
 
-
-cli_main(flow)
+    cli_main(flow)
