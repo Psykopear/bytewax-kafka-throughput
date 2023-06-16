@@ -1,9 +1,9 @@
-# [[benches]]
-# folder = "src/bytewax_0_10/"
-# file = "custom_kafka_in.py"
-# id = "bw010-custom-kafka-in"
-# consume_topic = "bw010-custom-kafka-in_intopic"
-# produce_topic = "bw010-custom-kafka-in_outtopic"
+[[benches]]
+folder = "src/bytewax_0_10/"
+file = "custom_kafka_in.py"
+id = "bw010-custom-kafka-in"
+consume_topic = "bw010-custom-kafka-in_intopic"
+produce_topic = "bw010-custom-kafka-in_outtopic"
 
 [[benches]]
 folder = "src/bytewax_0_16/"

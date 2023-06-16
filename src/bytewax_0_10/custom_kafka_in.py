@@ -36,7 +36,7 @@ def output_builder(worker_index, worker_count):
     producer = KafkaProducer(bootstrap_servers=BROKERS)
 
     def send_to_kafka(item):
-        producer.send(PRODUCE_TOPIC, item)
+        producer.send(PRODUCE_TOPIC, f"{item}".encode())
 
     return send_to_kafka
 

@@ -27,4 +27,16 @@ And finally run the benchmarks with:
 python benchmark.py
 ```
 
+## Add more benchmarks
+To add one more file in the benchmark suite, either add a new python script to one of the existing folders in `src/`, or create a new folder if you need different dependencies.
+If you create a new folder, you'll need to include a `requirements.txt` file with all the dependencies needed to run your script.
+
+The included script will be passed the following environment variables:
+- `GROUP_ID`
+- `CONSUME_TOPIC`
+- `PRODUCE_TOPIC`
+- `BROKERS`
+
+The script is expected to run continuously, the benchmark process will kill it after having collected enough data.
+
 ## Results

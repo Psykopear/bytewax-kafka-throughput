@@ -13,7 +13,6 @@ if __name__ == "__main__":
         {
             "bootstrap.servers": BROKERS,
             "group.id": GROUP_ID,
-            "auto.offset.reset": "end",
             "enable.auto.commit": True,
         }
     )
@@ -25,9 +24,6 @@ if __name__ == "__main__":
         msg = consumer.poll(0.001)
         if msg is None:
             continue
-        if msg.error():
-            raise StopIteration(msg.error())
-
         _, payload_input = msg.key(), msg.value()
         producer.produce(PRODUCE_TOPIC, payload_input)
         producer.flush()

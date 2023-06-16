@@ -1,8 +1,11 @@
 import tomllib
 
+from time import time
+from concurrent.futures import wait
 from csv import DictWriter
 from subprocess import Popen, check_output
 from time import sleep
+from confluent_kafka.admin import AdminClient, NewTopic
 
 
 BROKERS = "localhost:19092,localhost:29092,localhost:39092"
@@ -24,15 +27,18 @@ def sample_group(id: str, topic: str):
         writer.writeheader()
 
         # more or less one minute of samples
-        for epoch in range(600):
+        samples = 1200
+        start = time()
+        for epoch in range(samples):
             sleep(0.1)
-            loader(f"Sampling lag for {bench['id']}", epoch, 600)
+            elapsed = f"{time() - start:.2f}"
+            loader(f"Sampling lag for {bench['id']}", epoch, samples)
             ps = check_output(["rpk", "group", "describe", id, "--brokers", BROKERS])
             for line in ps.splitlines():
                 line = line.decode()
                 if topic in line:
                     lag = int(line.split()[4])
-                    writer.writerow({"epoch": epoch, "lag": lag})
+                    writer.writerow({"epoch": elapsed, "lag": lag})
     print()
 
 
@@ -50,9 +56,24 @@ if __name__ == "__main__":
         producer_process = None
         process = None
         try:
+            print_msg("Recreating consumer groups and topics")
+            config = {"bootstrap.servers": BROKERS}
+            admin = AdminClient(config)
+            groups = admin.list_consumer_groups().result().valid
+            for future in admin.delete_consumer_groups([group.group_id for group in groups]).values():
+                wait([future])
+            for future in admin.delete_topics(
+                [bench["consume_topic"], bench["produce_topic"]]
+            ).values():
+                wait([future])
+            consume_topic = NewTopic(bench["consume_topic"], num_partitions=1)
+            produce_topic = NewTopic(bench["produce_topic"], num_partitions=1)
+            for future in admin.create_topics([consume_topic, produce_topic]).values():
+                wait([future])
+
             print_msg("Running producer")
             producer_process = Popen(
-                ["python", "produce.py", "3000", bench["consume_topic"]]
+                ["python", "produce.py", "10000", bench["consume_topic"]]
             )
             exe = f"{bench['folder']}/.venv/bin/python"
             file = f"{bench['folder']}/{bench['file']}"
@@ -62,10 +83,13 @@ if __name__ == "__main__":
                 "CONSUME_TOPIC": bench["consume_topic"],
                 "PRODUCE_TOPIC": bench["produce_topic"],
             }
+
             print_msg("Running script")
             process = Popen([exe, file], env=env)
             # Sample lag
             sample_group(bench["id"], bench["consume_topic"])
+        except:
+            raise
         finally:
             if process is not None:
                 process.kill()
