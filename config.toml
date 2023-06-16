@@ -1,4 +1,5 @@
 messages_per_second = "10000"
+kafka_brokers = ["localhost:19092", "localhost:29092", "localhost:39092"]
 
 [[benches]]
 folder = "src/bytewax_0_10/"

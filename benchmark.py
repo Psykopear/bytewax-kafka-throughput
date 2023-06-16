@@ -13,17 +13,17 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt="%H:%M:%S",
 )
-logger = logging.getLogger(__name__)
-
-BROKERS = "localhost:19092,localhost:29092,localhost:39092"
+logger = logging.getLogger(__file__)
 
 
 def loader(msg, step, max):
-    """ Can you see it? """
-    print(f"{chr(step%256+10240)} {msg} {round(step * 100 / max)}%", end="\r", flush=True)
+    """Can you see it?"""
+    print(
+        f"{chr(step%256+10240)} {msg} {round(step * 100 / max)}%", end="\r", flush=True
+    )
 
 
-def sample_group(id: str, topic: str):
+def sample_group(id: str, topic: str, brokers: str):
     """
     Sample lag using `rpk`.
     """
@@ -38,7 +38,7 @@ def sample_group(id: str, topic: str):
             sleep(0.1)
             elapsed = f"{time() - start:.2f}"
             loader(f"Sampling lag for {bench['id']}", i, samples)
-            ps = check_output(["rpk", "group", "describe", id, "--brokers", BROKERS])
+            ps = check_output(["rpk", "group", "describe", id, "--brokers", brokers])
             for line in ps.splitlines():
                 line = line.decode()
                 if topic in line:
@@ -52,7 +52,8 @@ if __name__ == "__main__":
     with open("config.toml", "rb") as f:
         config = tomllib.load(f)
     benches = config["benches"]
-    limit = config["messages_per_second"]
+    messages_per_second = config["messages_per_second"]
+    brokers = ",".join(config["kafka_brokers"])
 
     # Just check we have everything
     for bench in benches:
@@ -60,7 +61,7 @@ if __name__ == "__main__":
             assert key in bench, f"Missing {key} in bench config"
 
     # We'll need this
-    admin = AdminClient({"bootstrap.servers": BROKERS})
+    admin = AdminClient({"bootstrap.servers": brokers})
 
     for bench in benches:
         producer_process = None
@@ -86,12 +87,14 @@ if __name__ == "__main__":
             wait(admin.create_topics(topics).values())
 
             logger.info("Running producer")
-            producer_process = Popen(["python", "produce.py", limit, consume_topic])
+            producer_process = Popen(
+                ["python", "produce.py", consume_topic, messages_per_second, brokers]
+            )
 
             exe = f"{bench['folder']}/.venv/bin/python"
             file = f"{bench['folder']}/{bench['file']}"
             env = {
-                "BROKERS": BROKERS,
+                "BROKERS": brokers,
                 "GROUP_ID": group_id,
                 "CONSUME_TOPIC": consume_topic,
                 "PRODUCE_TOPIC": produce_topic,
@@ -100,7 +103,7 @@ if __name__ == "__main__":
             logger.info("Running script")
             process = Popen([exe, file], env=env)
             # Sample lag
-            sample_group(group_id, consume_topic)
+            sample_group(group_id, consume_topic, brokers)
         finally:
             if process is not None:
                 process.kill()
