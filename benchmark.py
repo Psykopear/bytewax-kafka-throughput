@@ -1,4 +1,5 @@
 import tomllib
+import logging
 
 from time import time
 from concurrent.futures import wait
@@ -7,89 +8,99 @@ from subprocess import Popen, check_output
 from time import sleep
 from confluent_kafka.admin import AdminClient, NewTopic
 
+logging.basicConfig(
+    format="%(asctime)s:%(levelname)s:%(module)s:%(name)s\t%(message)s",
+    level=logging.INFO,
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 BROKERS = "localhost:19092,localhost:29092,localhost:39092"
-LOADER = ["-", "\\", "|", "/"]
-
-
-def print_msg(msg, **kwargs):
-    print(f"==> {msg}", **kwargs)
 
 
 def loader(msg, step, max):
-    perc = round(step * 100 / max)
-    print_msg(f"{msg} {LOADER[step % len(LOADER)]} {perc}%", end="\r", flush=True)
+    """ Can you see it? """
+    print(f"{chr(step%256+10240)} {msg} {round(step * 100 / max)}%", end="\r", flush=True)
 
 
 def sample_group(id: str, topic: str):
+    """
+    Sample lag using `rpk`.
+    """
     with open(f"results/{id}.csv", "w") as file:
-        writer = DictWriter(file, ["epoch", "lag"])
+        writer = DictWriter(file, ["elapsed", "lag"])
         writer.writeheader()
 
         # more or less one minute of samples
         samples = 1200
         start = time()
-        for epoch in range(samples):
+        for i in range(samples):
             sleep(0.1)
             elapsed = f"{time() - start:.2f}"
-            loader(f"Sampling lag for {bench['id']}", epoch, samples)
+            loader(f"Sampling lag for {bench['id']}", i, samples)
             ps = check_output(["rpk", "group", "describe", id, "--brokers", BROKERS])
             for line in ps.splitlines():
                 line = line.decode()
                 if topic in line:
                     lag = int(line.split()[4])
-                    writer.writerow({"epoch": elapsed, "lag": lag})
+                    writer.writerow({"elapsed": elapsed, "lag": lag})
     print()
 
 
 if __name__ == "__main__":
-    # Then load the configuration
+    # Load config
     with open("config.toml", "rb") as f:
-        benches = tomllib.load(f)["benches"]
+        config = tomllib.load(f)
+    benches = config["benches"]
+    limit = config["messages_per_second"]
 
     # Just check we have everything
     for bench in benches:
         for key in ["folder", "file", "id", "consume_topic", "produce_topic"]:
             assert key in bench, f"Missing {key} in bench config"
 
+    # We'll need this
+    admin = AdminClient({"bootstrap.servers": BROKERS})
+
     for bench in benches:
         producer_process = None
         process = None
-        try:
-            print_msg("Recreating consumer groups and topics")
-            config = {"bootstrap.servers": BROKERS}
-            admin = AdminClient(config)
-            groups = admin.list_consumer_groups().result().valid
-            for future in admin.delete_consumer_groups([group.group_id for group in groups]).values():
-                wait([future])
-            for future in admin.delete_topics(
-                [bench["consume_topic"], bench["produce_topic"]]
-            ).values():
-                wait([future])
-            consume_topic = NewTopic(bench["consume_topic"], num_partitions=1)
-            produce_topic = NewTopic(bench["produce_topic"], num_partitions=1)
-            for future in admin.create_topics([consume_topic, produce_topic]).values():
-                wait([future])
+        group_id = bench["id"]
+        consume_topic = bench["consume_topic"]
+        produce_topic = bench["produce_topic"]
 
-            print_msg("Running producer")
-            producer_process = Popen(
-                ["python", "produce.py", "10000", bench["consume_topic"]]
-            )
+        try:
+            logger.info("Querying existing consumer groups")
+            groups = admin.list_consumer_groups().result().valid
+            groups = [group.group_id for group in groups]
+            if group_id in groups:
+                logger.info(f"Deleting existing consumer group {group_id}!")
+                wait(admin.delete_consumer_groups([group_id]).values())
+
+            logger.info("Resetting topics")
+            wait(admin.delete_topics([consume_topic, produce_topic]).values())
+            topics = [
+                NewTopic(consume_topic, num_partitions=1),
+                NewTopic(produce_topic, num_partitions=1),
+            ]
+            wait(admin.create_topics(topics).values())
+
+            logger.info("Running producer")
+            producer_process = Popen(["python", "produce.py", limit, consume_topic])
+
             exe = f"{bench['folder']}/.venv/bin/python"
             file = f"{bench['folder']}/{bench['file']}"
             env = {
                 "BROKERS": BROKERS,
-                "GROUP_ID": bench["id"],
-                "CONSUME_TOPIC": bench["consume_topic"],
-                "PRODUCE_TOPIC": bench["produce_topic"],
+                "GROUP_ID": group_id,
+                "CONSUME_TOPIC": consume_topic,
+                "PRODUCE_TOPIC": produce_topic,
             }
 
-            print_msg("Running script")
+            logger.info("Running script")
             process = Popen([exe, file], env=env)
             # Sample lag
-            sample_group(bench["id"], bench["consume_topic"])
-        except:
-            raise
+            sample_group(group_id, consume_topic)
         finally:
             if process is not None:
                 process.kill()

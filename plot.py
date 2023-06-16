@@ -18,9 +18,9 @@ data = []
 for file in csv_files:
     with open(file, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
-        file_data = {'name': file, 'epoch': [], 'lag': []}
+        file_data = {'name': file, 'elapsed': [], 'lag': []}
         for row in reader:
-            file_data['epoch'].append(float(row['epoch']))
+            file_data['elapsed'].append(float(row['elapsed']))
             file_data['lag'].append(float(row['lag']))
         data.append(file_data)
 
@@ -32,9 +32,9 @@ colors = ['red', 'blue', 'green', 'orange', 'purple', 'black']
 
 # Plot the data from each file
 for i, file_data in enumerate(data):
-    epoch = file_data['epoch']
+    elapsed = file_data['elapsed']
     lag = file_data['lag']
-    ax.plot(epoch, lag, color=colors[i], label=file_data['name'])
+    ax.plot(elapsed, lag, color=colors[i], label=file_data['name'])
 
 # Set labels and title for the plot
 ax.set_xlabel('Time (s)')

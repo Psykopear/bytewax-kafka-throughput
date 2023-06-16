@@ -1,3 +1,5 @@
+messages_per_second = "10000"
+
 [[benches]]
 folder = "src/bytewax_0_10/"
 file = "custom_kafka_in.py"
