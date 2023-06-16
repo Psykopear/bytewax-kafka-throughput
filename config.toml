@@ -1,37 +1,45 @@
-messages_per_second = "10000"
+# Each benchmark will be executed multiple times,
+# each time with a producer that generates the given number
+# of messages per second
+messages_per_second = [2000, 10000, 20000]
+# Number of samples to take.
+# After each sample, the sampler sleeps for 0.1 seconds,
+# so each run will take approximately samples/10 seconds
+samples = 1200
+# Kafka brokers that will be passed to each script
 kafka_brokers = ["localhost:19092", "localhost:29092", "localhost:39092"]
 
 [[benches]]
-folder = "src/bytewax_0_10/"
+folder = "benches/bytewax_0_10/"
 file = "custom_kafka_in.py"
-id = "bw010-custom-kafka-in"
+group_id = "bw010-custom-kafka-in"
 consume_topic = "bw010-custom-kafka-in_intopic"
 produce_topic = "bw010-custom-kafka-in_outtopic"
 
 [[benches]]
-folder = "src/bytewax_0_16/"
+folder = "benches/bytewax_0_16/"
 file = "custom_kafka_in.py"
-id = "bw016-custom-kafka-in"
+group_id = "bw016-custom-kafka-in"
 consume_topic = "bw016-custom-kafka-in_intopic"
 produce_topic = "bw016-custom-kafka-in_outtopic"
 
 [[benches]]
-folder = "src/bytewax_0_16/"
+folder = "benches/bytewax_0_16/"
 file = "kafka_connectors.py"
-id = "bw016-kafka-connectors"
+group_id = "bw016-kafka-connectors"
 consume_topic = "bw016-kafka-connectors_intopic"
 produce_topic = "bw016-kafka-connectors_outtopic"
 
 [[benches]]
-folder = "src/plain_python/"
+folder = "benches/plain_python/"
 file = "kafka_confluent.py"
-id = "plain-kafka-confluent"
+group_id = "plain-kafka-confluent"
 consume_topic = "plain-kafka-confluent_intopic"
 produce_topic = "plain-kafka-confluent_outtopic"
 
 [[benches]]
-folder = "src/plain_python/"
+folder = "benches/plain_python/"
 file = "kafka_python.py"
-id = "plain-kafka-python"
+group_id = "plain-kafka-python"
 consume_topic = "plain-kafka-python_intopic"
 produce_topic = "plain-kafka-python_outtopic"

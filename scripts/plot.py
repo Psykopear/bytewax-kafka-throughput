@@ -5,11 +5,12 @@ import argparse
 from matplotlib import pyplot as plt
 
 parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("files", help="Files to plot", type=str, nargs='+')
 parser.add_argument("-o", "--output", help="Save image to the given filename.")
 args = parser.parse_args()
 
 # Define the path to your CSV files
-csv_files = glob.glob('results/*.csv')
+csv_files = args.files
 
 # Create a list to store data from each file
 data = []

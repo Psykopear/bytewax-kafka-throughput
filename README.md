@@ -16,15 +16,18 @@ docker compose up -d
 Wait for the cluster to be up and running, you can check the redpanda console at `http://localhost:8080`.
 
 Now prepare the virtualenvs with:
-
 ```
 ./prepare_envs.sh
 ```
 
-And finally run the benchmarks with:
-
+Run the benchmarks with:
 ```
-python benchmark.py
+.venv/bin/python scripts/benchmark.py
+```
+
+Plot the benchmarks with:
+```
+.venv/bin/python scripts/plot.py -o results/plot.png
 ```
 
 ## Add more benchmarks
@@ -37,6 +40,9 @@ The included script will be passed the following environment variables:
 - `PRODUCE_TOPIC`
 - `BROKERS`
 
+Once you added the files, add an entry into `config.toml`.  
 The script is expected to run continuously, the benchmark process will kill it after having collected enough data.
 
 ## Results
+### 10_000 messages per second produced
+![results](./results/plot.png)
