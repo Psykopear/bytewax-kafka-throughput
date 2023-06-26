@@ -27,7 +27,7 @@ Run the benchmarks with:
 
 Plot the benchmarks with:
 ```
-.venv/bin/python scripts/plot.py -o results/plot.png
+.venv/bin/python scripts/plot.py results/10000_*.csv -o results/plot.png
 ```
 
 ## Add more benchmarks
@@ -44,9 +44,7 @@ Once you added the files, add an entry into `config.toml`.
 The script is expected to run continuously, the benchmark process will kill it after having collected enough data.
 
 ## Results
-### 2_000 messages per second produced
-![2k](./results/2k.png)
 ### 10_000 messages per second produced
 ![10k](./results/10k.png)
-### 20_000 messages per second produced
-![20k](./results/20k.png)
+### 100_000 messages per second produced
+![100k](./results/100k.png)
