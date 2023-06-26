@@ -34,7 +34,7 @@ colors = ['red', 'blue', 'green', 'orange', 'purple', 'black']
 for i, file_data in enumerate(data):
     elapsed = file_data['elapsed']
     lag = file_data['lag']
-    ax.plot(elapsed, lag, color=colors[i], label=file_data['name'], linewidth=0.5)
+    ax.plot(elapsed, lag, color=colors[i], label=file_data['name'], linewidth=1.0)
 
 # Set labels and title for the plot
 ax.set_xlabel('Time (s)')
@@ -46,6 +46,6 @@ ax.legend()
 
 # Display or save the plot
 if args.output:
-    plt.savefig(args.output, dpi=200)
+    plt.savefig(args.output, dpi=400)
 else:
     plt.show()
