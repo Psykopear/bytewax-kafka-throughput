@@ -42,9 +42,3 @@ The included script will be passed the following environment variables:
 
 Once you added the files, add an entry into `config.toml`.  
 The script is expected to run continuously, the benchmark process will kill it after having collected enough data.
-
-## Results
-### 10_000 messages per second produced
-![10k](./results/10k.png)
-### 100_000 messages per second produced
-![100k](./results/100k.png)
