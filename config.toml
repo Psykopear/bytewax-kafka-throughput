@@ -1,13 +1,27 @@
 # Each benchmark will be executed multiple times,
 # each time with a producer that generates the given number
 # of messages per second
-messages_per_second = [10000, 100000]
+messages_per_second = [100000]
 # Number of samples to take.
 # After each sample, the sampler sleeps for 0.1 seconds,
 # so each run will take approximately samples/10 seconds
-samples = 300
+samples = 600
 # Kafka brokers that will be passed to each script
 kafka_brokers = ["localhost:19092", "localhost:29092", "localhost:39092"]
+
+[[benches]]
+folder = "benches/bytewax_experimental/"
+file = "batched_kafka_in_null_out.py"
+group_id = "bwexperimental-batched-kafka-in-null-out"
+consume_topic = "bwexperimental-batched-kafka-in-null-out_intopic"
+produce_topic = "bwexperimental-batched-kafka-in-null-out_outtopic"
+
+[[benches]]
+folder = "benches/bytewax_0_16/"
+file = "kafka_in_null_out.py"
+group_id = "bw016-kafka-in-null-out"
+consume_topic = "bw016-kafka-in-null-out_intopic"
+produce_topic = "bw016-kafka-in-null-out_outtopic"
 
 [[benches]]
 folder = "benches/bytewax_0_10/"

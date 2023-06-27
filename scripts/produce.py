@@ -1,7 +1,6 @@
 import argparse
 import json
-import os
-import sys
+import base64
 
 from time import time
 from datetime import datetime
@@ -27,12 +26,14 @@ if __name__ == "__main__":
 
     # Create some content to send, we don't really care
     # about the value
-    content = json.dumps(
-        {
-            "ts": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
-            "id": "one",
-            "param": 0.1,
-        }
+    content = {
+        "ts": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "id": "one",
+        "pi": 0.1,
+    }
+
+    row = json.dumps(
+        {"content": base64.b64encode(json.dumps(content).encode("utf-8")).decode()}
     ).encode()
 
     # Send at most `args.messages_per_second` messages in one second.
@@ -55,7 +56,7 @@ if __name__ == "__main__":
             continue
         messages_in_last_sec += 1
         flush_counter += 1
-        producer.produce(args.topic, content)
+        producer.produce(args.topic, row)
 
         # Do not flush at every message, but also
         # avoid filling up the buffer
